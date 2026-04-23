@@ -132,3 +132,106 @@ public class Main {
 
 
 
+t.start(); // new thread created
+t.run();   // normal method call******************
+
+THREAD LIFE CYLCE ******************************************
+NEW → RUNNABLE → RUNNING → WAITING/BLOCKED/TIMED_WAITING → TERMINATED
+
+1. NEW State
+
+Thread object is created, but not started yet.
+
+Thread t = new Thread();
+
+Now thread is in NEW state.
+
+It has not begun execution.
+
+2. RUNNABLE State
+
+After calling:
+
+t.start();
+
+Thread enters RUNNABLE state.
+
+Means:
+
+Ready to run
+Waiting for CPU scheduling
+
+Java combines “ready” and “running” under RUNNABLE.
+
+3. RUNNING State
+
+When CPU scheduler selects thread, it executes run().
+
+public void run() {
+   // code executing
+}
+
+This is commonly called running state.
+
+(Official Java enum still reports RUNNABLE.)
+
+4. BLOCKED State
+
+Thread waits to acquire a monitor lock.
+
+Example:
+
+synchronized(obj) {
+}
+
+If another thread already holds lock, it becomes BLOCKED.
+
+5. WAITING State
+
+Thread waits indefinitely until another thread wakes it.
+
+Examples:
+
+obj.wait();
+t.join();
+
+Needs another thread action like notify() or thread completion.
+
+6. TIMED_WAITING State
+
+Thread waits for a specific time.
+
+Examples:
+
+Thread.sleep(1000);
+t.join(2000);
+
+After time ends, it returns to runnable.
+
+7. TERMINATED State
+
+When run() finishes or thread dies due to exception.
+
+Then thread cannot restart.
+
+t.start(); // once only
+
+Calling start() again causes exception
+
+
+
+Thread t = new Thread(() -> {
+    try {
+        Thread.sleep(1000);
+    } catch(Exception e) {}
+});
+
+System.out.println(t.getState()); // NEW
+
+t.start();
+
+System.out.println(t.getState()); // RUNNABLE / TIMED_WAITING
+
+t.join();
+
+System.out.println(t.getState()); // TERMINATED

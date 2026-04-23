@@ -88,6 +88,21 @@ import java.util.concurrent.Executors;
 
 
 public class mul1 extends Thread  {
-
+ 
+    public void run()
+    {
+        System.out.println(Thread.currentThread().getName());
+        for(int i=0;i<5;i++)
+        {
+            System.out.println("Thread "+i);
+        }
+    }
+    public static void main(String[] args) {
+        System.out.println("main method started");
+        System.out.println(Thread.currentThread().getName());
+        Thread t1=new mul1();
+        t1.start();
+        // t1.run();
+    }
     
 }
