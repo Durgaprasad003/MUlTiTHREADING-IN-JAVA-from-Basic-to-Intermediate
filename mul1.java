@@ -101,7 +101,11 @@ public class mul1 extends Thread  {
         System.out.println("main method started");
         System.out.println(Thread.currentThread().getName());
         Thread t1=new mul1();
+        t1.setName("task");
+        System.out.println(t1.isAlive());
         t1.start();
+        System.out.println(t1.isAlive());
+        System.out.println(t1.getName());
         // t1.run();
     }
     

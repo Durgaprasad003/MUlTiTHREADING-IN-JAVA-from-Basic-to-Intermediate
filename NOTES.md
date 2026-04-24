@@ -235,3 +235,48 @@ System.out.println(t.getState()); // RUNNABLE / TIMED_WAITING
 t.join();
 
 System.out.println(t.getState()); // TERMINATED
+
+
+
+
+THREAD METHODS
+
+start()
+run()
+sleep(ms)
+Pauses current thread for some time.
+Thread.sleep(2000);   // sleep for 2 seconds
+When to Use:
+Delay execution
+Timer tasks
+Animation
+Retry after waiting
+Reduce CPU usage in loops
+
+
+join()
+join() makes the current thread wait until another thread finishes.
+When to Use:
+Use when:
+One task depends on another task finishing first
+Main thread should wait for worker thread
+Need ordered execution
+
+
+yield()
+Current thread says:
+"If another thread needs CPU, I can pause."   
+It gives chance to other same-priority threads.
+When to Use:
+Improve fairness between threads
+Long-running loop thread can give chance to others
+
+
+
+interrupt()
+isAlive()
+getName()
+setName()
+currentThread()
+getPriority()
+setPriority()
