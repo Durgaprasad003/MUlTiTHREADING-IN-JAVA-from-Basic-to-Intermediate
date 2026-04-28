@@ -54,7 +54,9 @@ class Mul1 implements Runnable
 Then object is only a task:
 new Thread(new Mul1()).start();
 
-
+No. Runnable is not a thread. It is an interface in Java that represents a task or job to be executed.*****
+Because Mul implements Runnable, it is not a thread. It is only a task that contains the run() method.
+start() method belongs to the Thread class, not Runnable. So Mul obj = new Mul(); obj.start(); is invalid.
 
 
 ExecutorService is one of the most important concurrency utilities in Java. It manages a pool of threads so you don’t have to create and control threads manually.
@@ -280,3 +282,127 @@ setName()
 currentThread()
 getPriority()
 setPriority()
+
+
+
+
+wait() is in the Object class because it is used for object-level synchronization, not for thread execution control.
+Methods like start(), run(), sleep(), and yield() control the behavior of the current thread, so they belong to the Thread class.
+But wait() is different—it makes a thread wait on a shared object's lock (monitor) until another thread calls notify() or notifyAll() on the same object. Since every Java object can be used as a lock, wait() is placed in the Object class.
+One-line answer:
+“Thread methods control thread execution, but wait() works with an object's monitor lock, so it belongs to Object class, not Thread class.”
+
+
+volatile vs synchronized
+volatile	synchronized
+Visibility only	Visibility + atomicity
+No lock	Locking
+
+
+Race Condition
+Multiple threads modify shared data incorrectly.
+
+6. Solution = Synchronization
+Synchronization means:
+Only one thread can access critical section at a time.
+
+
+
+🔹 What is a Lock?
+A lock is like a permission token that allows only one thread at a time to use shared code/data.
+If one thread has the lock:
+other threads must wait
+they cannot enter that synchronized area
+
+
+
+
+How synchronized Works Internally******************************
+
+When thread enters:
+
+synchronized void increment()
+
+Java gives lock of object.
+Other thread must wait.
+When first thread exits:
+Lock released.
+Second thread enters.
+
+
+
+A synchronized block lets you lock only a specific section of code instead of an entire method.
+
+It means:
+
+Only one thread at a time can execute that block using the same lock object.
+
+Basic Syntax
+synchronized(lockObject) {
+    // critical section
+}
+lockObject = object used as monitor/lock
+Other threads using the same lock must wait
+Your Example
+
+Use obj as lock:
+
+synchronized(obj) {
+    obj.increment();
+    System.out.println(obj.count);
+}
+
+Now increment + print happen together safely.
+
+
+
+
+class Counter {
+    int count = 0;
+
+    void increment() {
+        count++;
+    }
+}
+
+public class Mul2 {
+    public static void main(String[] args) throws Exception {
+
+        Counter obj = new Counter();
+
+        Thread t1 = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                synchronized(obj) {        ********************
+                    obj.increment();
+                    System.out.println("Thread 1 : " + obj.count);
+                }
+            }
+        });
+
+        Thread t2 = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                synchronized(obj) {
+                    obj.increment();
+                    System.out.println("Thread 2 : " + obj.count);
+                }
+            }
+        });
+
+        t1.start();
+        t2.start();
+
+        t1.join();
+        t2.join();
+    }
+}
+
+
+
+Atomicity (not “automacity”) means an operation happens as one indivisible unit.
+
+It either:
+
+completes fully, or
+does not happen at all.
+
+No other thread can see it half-finished.

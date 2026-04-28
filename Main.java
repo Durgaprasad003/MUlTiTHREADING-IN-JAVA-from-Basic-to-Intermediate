@@ -45,28 +45,28 @@
 
 
 
-class MyThread extends Thread {
-    public void run() {
-        for (int i = 1; i <= 3; i++) {
-            try {
-                Thread.sleep(1000);
-                System.out.println(i);
-                Thread.yield();
-            } catch (InterruptedException e) {
-                System.out.println("Interrupted");
-            }
-        }
-    }
-}
+// class MyThread extends Thread {
+//     public void run() {
+//         for (int i = 1; i <= 3; i++) {
+//             try {
+//                 Thread.sleep(1000);
+//                 System.out.println(i);
+//                 Thread.yield();
+//             } catch (InterruptedException e) {
+//                 System.out.println("Interrupted");
+//             }
+//         }
+//     }
+// }
 
-public class Main {
-    public static void main(String[] args) throws Exception {
-        MyThread t1 = new MyThread();
+// public class Main {
+//     public static void main(String[] args) throws Exception {
+//         MyThread t1 = new MyThread();
 
-        t1.start();
+//         t1.start();
 
-        t1.join();
+//         t1.join();
 
-        System.out.println("Main finished");
-    }
-}
+//         System.out.println("Main finished");
+//     }
+// }

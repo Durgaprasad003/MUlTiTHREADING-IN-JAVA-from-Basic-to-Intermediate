@@ -17,11 +17,19 @@ import java.util.concurrent.Executors;
 //     }
 //     public static void main(String[] args) {
 //         System.out.println("hello this is main");
+        
 //         System.out.println(Thread.currentThread().getName());
 //         // Thread t=new mul1();
 //         mul1 t=new mul1();
 //         t.start();
-//             System.out.println("Main ends");
+//          try {
+//             Thread.sleep(1000);
+             
+//         } catch (InterruptedException e) {
+//             // TODO Auto-generated catch block
+//             e.printStackTrace();
+//         } 
+//          System.out.println("Main ends");
 //             ExecutorService ex=Executors.newFixedThreadPool(5);
 //             ex.submit(() -> System.out.println("Task"));
 // ex.shutdown();
@@ -87,26 +95,26 @@ import java.util.concurrent.Executors;
 // }
 
 
-public class mul1 extends Thread  {
+// public class mul1 extends Thread  {
  
-    public void run()
-    {
-        System.out.println(Thread.currentThread().getName());
-        for(int i=0;i<5;i++)
-        {
-            System.out.println("Thread "+i);
-        }
-    }
-    public static void main(String[] args) {
-        System.out.println("main method started");
-        System.out.println(Thread.currentThread().getName());
-        Thread t1=new mul1();
-        t1.setName("task");
-        System.out.println(t1.isAlive());
-        t1.start();
-        System.out.println(t1.isAlive());
-        System.out.println(t1.getName());
-        // t1.run();
-    }
+//     public void run()
+//     {
+//         System.out.println(Thread.currentThread().getName());
+//         for(int i=0;i<5;i++)
+//         {
+//             System.out.println("Thread "+i);
+//         }
+//     }
+//     public static void main(String[] args) {
+//         System.out.println("main method started");
+//         System.out.println(Thread.currentThread().getName());
+//         Thread t1=new mul1();
+//         t1.setName("task");
+//         System.out.println(t1.isAlive());
+//         t1.start();
+//         System.out.println(t1.isAlive());
+//         System.out.println(t1.getName());
+//         // t1.run();
+//     }
     
-}
+// }
