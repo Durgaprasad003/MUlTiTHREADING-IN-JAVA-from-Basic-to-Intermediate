@@ -406,3 +406,272 @@ completes fully, or
 does not happen at all.
 
 No other thread can see it half-finished.
+
+
+
+15. Deadlock
+
+Two threads waiting forever.
+
+Thread1 locks A then waits B
+Thread2 locks B then waits A
+Example
+class A {}
+class B {}
+
+A a = new A();
+B b = new B();
+
+Thread t1 = new Thread(() -> {
+    synchronized(a) {
+        synchronized(b) {
+            System.out.println("T1 done");
+        }
+    }
+});
+
+Thread t2 = new Thread(() -> {
+    synchronized(b) {
+        synchronized(a) {
+            System.out.println("T2 done");
+        }
+    }
+});
+
+Danger: deadlock.
+
+Prevention
+
+Always lock in same order.
+
+
+
+
+
+16. wait(), notify(), notifyAll()
+
+Used for thread communication.
+
+Must be inside synchronized block.
+
+
+
+
+
+This is explicit locking in Java using ReentrantLock.
+
+It is an alternative to synchronized.
+
+What It Is
+ReentrantLock lock = new ReentrantLock();
+
+Creates a lock object.
+
+Then:
+
+lock.lock();
+
+Current thread acquires the lock.
+
+Only one thread can hold it at a time.
+
+Other threads calling lock.lock() must wait.
+
+Why Use It
+
+Used to protect shared resources in multithreading.
+
+Example:
+
+bank balance
+ticket booking
+counter
+file writing
+shared list
+
+Without locking:
+
+race conditions
+corrupted data
+wrong results
+Why Not Just synchronized?
+
+ReentrantLock gives more control.
+
+Extra Features
+1. Try Lock
+lock.tryLock()
+
+Try acquiring lock without waiting forever.
+
+2. Fair Locking
+
+Threads get lock in queue order.
+
+3. Interruptible Lock
+
+Can interrupt waiting thread.
+
+4. Manual Unlocking
+
+You choose exactly when to release.
+
+Why try-finally
+lock.lock();
+try {
+   // critical section
+} finally {
+   lock.unlock();
+}
+
+Ensures lock always releases even if exception happens.
+
+Very important.
+
+Full Example (Counter)
+import java.util.concurrent.locks.ReentrantLock;
+
+class Counter {
+
+    int count = 0;
+    ReentrantLock lock = new ReentrantLock();
+
+    void increment(String name) {
+
+        lock.lock();
+
+        try {
+            System.out.println(name + " got lock");
+
+            for (int i = 1; i <= 3; i++) {
+                count++;
+                System.out.println(name + " count = " + count);
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                }
+            }
+
+            System.out.println(name + " releasing lock\n");
+
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) throws InterruptedException {
+
+        Counter obj = new Counter();
+
+        Thread t1 = new Thread(() -> obj.increment("Thread-1"));
+        Thread t2 = new Thread(() -> obj.increment("Thread-2"));
+
+        t1.start();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        System.out.println("Final Count = " + obj.count);
+    }
+}
+Output (Possible)
+Thread-1 got lock
+Thread-1 count = 1
+Thread-1 count = 2
+Thread-1 count = 3
+Thread-1 releasing lock
+
+Thread-2 got lock
+Thread-2 count = 4
+Thread-2 count = 5
+Thread-2 count = 6
+
+Final Count = 6
+What Means Reentrant?
+
+Same thread can acquire same lock multiple times.
+
+Example:
+
+lock.lock();
+lock.lock();
+
+Allowed.
+
+But must unlock same number of times.
+
+
+
+
+
+
+AtomicInteger is used when multiple threads need to safely update an integer without using synchronized blocks.
+
+It provides atomic operations like increment, decrement, compare-and-set.
+
+
+Problem Example
+int count = 0;
+
+Two threads each increment 1000 times.
+
+Expected:
+
+2000
+
+Actual maybe:
+
+1734
+1890
+1961
+
+Race condition.
+Solution: AtomicInteger
+AtomicInteger count = new AtomicInteger(0);
+
+Increment safely:
+
+count.incrementAndGet();
+
+Now threads can update safely without lost increments.
+
+
+
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class Main {
+
+    public static void main(String[] args) throws InterruptedException {
+
+        AtomicInteger count = new AtomicInteger(0);
+
+        Thread t1 = new Thread(() -> {
+            for (int i = 0; i < 1000; i++) {
+                count.incrementAndGet();
+            }
+        });
+
+        Thread t2 = new Thread(() -> {
+            for (int i = 0; i < 1000; i++) {
+                count.incrementAndGet();
+            }
+        });
+
+        t1.start();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        System.out.println("Final Count = " + count.get());
+    }
+}
+
+
+
