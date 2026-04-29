@@ -674,4 +674,325 @@ public class Main {
 }
 
 
+*************
+The Producer–Consumer problem is one of the most important concepts in Java multithreading. It teaches:
 
+Thread communication
+Synchronization
+Shared resources handling
+Waiting and notifying threads
+
+2. Real-Life Examples
+YouTube uploads video (Producer), users watch (Consumer)
+
+
+3. Why Problem Happens in Multithreading?
+
+Multiple threads share same memory.
+
+Example:
+
+Producer thread adds data.
+Consumer thread removes data.
+
+
+
+
+class Buffer {
+    int data;
+    boolean available = false;
+
+    synchronized void produce(int value) throws InterruptedException {
+
+        while(available) {
+            wait();
+        }
+
+        data = value;
+        available = true;
+
+        System.out.println("Produced: " + value);
+
+        notify();
+    }
+
+    synchronized int consume() throws InterruptedException {
+
+        while(!available) {
+            wait();
+        }
+
+        int value = data;
+        available = false;
+
+        System.out.println("Consumed: " + value);
+
+        notify();
+
+        return value;
+    }
+}
+
+
+
+class Producer extends Thread {
+    Buffer buffer;
+
+    Producer(Buffer buffer) {
+        this.buffer = buffer;
+    }
+
+    public void run() {
+        try {
+            for(int i=1; i<=5; i++) {
+                buffer.produce(i);
+                Thread.sleep(1000);
+            }
+        } catch(Exception e) {}
+    }
+}
+
+
+class Consumer extends Thread {
+    Buffer buffer;
+
+    Consumer(Buffer buffer) {
+        this.buffer = buffer;
+    }
+
+    public void run() {
+        try {
+            for(int i=1; i<=5; i++) {
+                buffer.consume();
+                Thread.sleep(1500);
+            }
+        } catch(Exception e) {}
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Buffer b = new Buffer();
+
+        new Producer(b).start();
+        new Consumer(b).start();
+    }
+}
+
+This Buffer stores one value at a time.
+
+produce() puts data into buffer
+consume() takes data from buffer
+int data;
+boolean available = false;
+Meaning:
+available = false → buffer is empty
+available = true → buffer has data
+
+
+
+2. Why Use ReentrantLock Instead of synchronized?
+
+synchronized is simpler, but limited.
+
+ReentrantLock gives:
+
+manual lock/unlock
+tryLock()
+timed lock waiting
+fairness policy
+interruptible lock waiting
+
+4. Why try-finally Is Mandatory in reentrantlock
+
+Always unlock even if exception occurs.
+
+
+
+
+6. tryLock() Example
+
+Instead of waiting forever:
+
+if(lock.tryLock()) {
+    try {
+        System.out.println("Got lock");
+    } finally {
+        lock.unlock();
+    }
+} else {
+    System.out.println("Could not get lock");
+}
+
+Useful when avoiding deadlocks.
+
+
+
+8. Fair Lock
+
+Normal lock may let threads “cut in line”.
+
+Fair lock gives lock in waiting order.
+
+ReentrantLock lock = new ReentrantLock(true);
+
+true = fair mode
+
+Tradeoff:
+
+
+
+
+
+********************************************************************
+A lock means a mechanism that allows only one thread at a time to access a shared resource or critical section.
+It is used to prevent multiple threads from changing the same data simultaneously.
+
+
+
+********************************************
+Callable and Future in Java (Detailed Guide)
+Callable and Future are Java concurrency features used when you want a thread task to return a result or throw exceptions.
+Callable and Future are used in Java multithreading when you want a thread to:
+
+return a result
+throw exceptions
+run asynchronously
+get output later
+
+
+1. What is Callable
+Callable<V> is an interface like Runnable, but better for many tasks.
+
+
+
+2. What is Future
+Future<V> represents the result of an asynchronous task.
+It acts like a placeholder for a value that will be ready later.
+
+
+import java.util.concurrent.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        Callable<Integer> task = () -> {
+            Thread.sleep(2000);
+            return 50;
+        };
+
+        Future<Integer> future = executor.submit(task);
+
+        System.out.println("Task submitted...");
+
+        int result = future.get();   // waits until result ready
+
+        System.out.println("Result: " + result);
+
+        executor.shutdown();
+    }
+}
+
+How It Works
+Step 1
+
+Create task:
+
+Callable<Integer>
+
+Means task returns Integer.
+
+Step 2
+
+Submit task:
+
+Future<Integer> future = executor.submit(task);
+
+Now task runs in another thread.
+
+Step 3
+
+Get result:
+
+future.get();
+
+Waits if task not finished.
+
+Returns value when completed
+
+Future<Integer> future = executor.submit(() -> {
+    Thread.sleep(3000);
+    return 99;
+});
+
+while(!future.isDone()) {
+    System.out.println("Still running...");
+    Thread.sleep(500);
+}
+
+System.out.println(future.get());
+
+
+ExecutorService executor =
+    Executors.newFixedThreadPool(3);
+
+Callable<Integer> t1 = () -> 10;
+Callable<Integer> t2 = () -> 20;
+Callable<Integer> t3 = () -> 30;
+
+Future<Integer> f1 = executor.submit(t1);
+Future<Integer> f2 = executor.submit(t2);
+Future<Integer> f3 = executor.submit(t3);
+
+System.out.println(f1.get());
+System.out.println(f2.get());
+System.out.println(f3.get());
+
+executor.shutdown();
+
+
+
+PHASE 13 — CONCURRENT COLLECTIONS
+
+Instead of normal collections.
+
+Must Learn
+ConcurrentHashMap
+CopyOnWriteArrayList
+BlockingQueue
+ConcurrentLinkedQueue
+ConcurrentSkipListMap
+
+PHASE 14 — BLOCKING QUEUE
+
+Used in producer-consumer.
+
+ArrayBlockingQueue
+LinkedBlockingQueue
+PriorityBlockingQueue
+DelayQueue
+
+PHASE 15 — ATOMIC CLASSES
+
+For lock-free thread-safe counters.
+
+AtomicInteger
+AtomicLong
+AtomicBoolean
+AtomicReference
+
+Example:
+
+PHASE 16 — SEMAPHORE
+
+Controls limited resources.
+
+Example:
+
+Only 5 DB connections.
+
+Semaphore sem = new Semaphore(5);
+sem.acquire();
+sem.release();
