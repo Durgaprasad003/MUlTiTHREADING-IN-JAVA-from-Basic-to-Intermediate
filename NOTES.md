@@ -996,3 +996,430 @@ Only 5 DB connections.
 Semaphore sem = new Semaphore(5);
 sem.acquire();
 sem.release();
+
+
+
+
+
+ReadWriteLock rw = new ReentrantReadWriteLock();
+rw.readLock().lock();
+rw.readLock().unlock();
+
+
+
+
+********************************************************
+8. What Happens When You Create Java Thread?
+Thread t = new Thread(task);
+t.start();
+
+Internally:
+
+JVM asks OS to create native thread
+OS allocates stack
+Scheduler manages it
+Thread becomes runnable
+CPU eventually executes it
+
+
+
+Q2: Why are threads lightweight?
+Because they share process resources.
+
+why output ordre is random 
+scheduler decides**********************
+
+
+👉
+“interrupt() is used to signal a thread to stop. It sets an interrupt flag, and if the thread is blocked in methods like sleep or wait, it throws InterruptedException. Otherwise, the thread must check the flag and handle it properly.”
+
+
+Q2: Difference BLOCKED vs WAITING?
+
+BLOCKED = waiting for monitor lock
+WAITING = waiting for signal/action
+
+
+*****************************************************************
+3. sleep(ms) — Pause Current Thread
+Definition
+
+Pauses current thread for given milliseconds.
+
+Thread.sleep(1000);
+Important
+static method
+pauses current thread
+enters TIMED_WAITING
+does NOT release lock
+
+👉 Even if an exception happens:
+
+JVM releases the lock
+Prevents deadlock
+
+
+
+🔹 Step 1: What is this Object lock = new Object();?
+👉 This is a monitor lock (mutex)
+Every object in Java has an intrinsic lock
+This lock object is used to control access to a critical section
+
+
+*****************************************
+Q1: sleep() vs wait()
+sleep belongs Thread
+wait belongs Object
+sleep does not release lock
+wait releases lock
+
+
+
+
+
+🔹 1. What is Callable?
+
+👉 Definition:
+Callable is a functional interface used to represent a task that:
+
+returns a result
+can throw exceptions
+
+
+********************************************
+Callable<Integer> task = () -> {
+            return 10 + 20;
+        };
+
+        ExecutorService service = Executors.newSingleThreadExecutor();
+
+        Future<Integer> result = service.submit(task);
+
+        System.out.println("Result: " + result.get());
+
+        service.shutdown();
+
+
+👉 Why we use Callable?
+
+When you need output from a thread
+When task may fail (exception handling needed)
+
+
+
+🔹 3. What is Future?
+
+👉 From:
+Future
+
+Future<Integer> result = service.submit(task);
+
+👉 Definition:
+Future is a placeholder object that represents the result of an asynchronous computation
+
+
+
+  Callable<String> task = () -> {
+            Thread.sleep(2000);
+            return "Task Completed";
+        };
+
+        ExecutorService service = Executors.newSingleThreadExecutor();
+
+        Future<String> future = service.submit(task);
+
+        System.out.println("Waiting...");
+        System.out.println(future.get());
+
+        service.shutdown();
+
+
+
+****************************
+10. execute() vs submit()
+execute()
+ex.execute(() -> {});
+Runnable only
+no result
+submit()
+Future<?> f = ex.submit(() -> {});
+Runnable / Callable
+returns Future
+
+
+
+
+
+
+🧠 What is Synchronization?
+
+👉 Synchronization is a mechanism to control access to shared resources when multiple threads are running.
+
+👉 It ensures:
+
+Only one thread accesses critical code at a time
+Prevents race conditions
+Maintains data consistency
+
+When multiple threads access shared mutable data it leades to data inconsistency:*******************
+
+
+4. Why It Happens Internally
+
+Two threads:
+
+count = 5
+
+T1 reads 5
+T2 reads 5
+T1 writes 6
+T2 writes 6
+
+*******************************
+2. Shared Memory Model
+
+Threads in same process share heap.
+
+Heap:
+ count = 0
+
+Thread A uses count
+Thread B uses count
+
+Since both can modify same object, conflict occurs.
+
+
+
+
+
+
+
+*****************************************************************
+🔹 What is inside Thread here?
+Thread t1 = new Thread(() -> {
+    for(int i=0;i<10000;i++) c.increment();
+});
+
+👉 That () -> { ... } is a lambda expression
+
+It is actually implementing:
+Runnable
+
+🔹 What does this mean internally?
+
+Your code:
+
+() -> {
+    for(int i=0;i<10000;i++) c.increment();
+}
+
+👉 Is equivalent to:
+
+Runnable task = new Runnable() {
+    @Override
+    public void run() {
+        for(int i=0;i<10000;i++) c.increment();
+    }
+};
+
+
+
+
+
+*************************************************************************************************************
+12. Example: Two Objects, Different Locks
+Program 6
+Printer p1 = new Printer();
+Printer p2 = new Printer();
+
+new Thread(() -> p1.print()).start();
+new Thread(() -> p2.print()).start();
+
+Can run simultaneously.
+
+Because different object locks.
+
+13. Same Object, Same Lock
+Program 7
+Printer p = new Printer();
+
+new Thread(() -> p.print()).start();
+new Thread(() -> p.print()).start();
+
+One thread waits.
+
+************************************************
+👉 A critical section is:
+
+Any piece of code where multiple threads access shared data and can cause problems if executed simultaneously.
+
+
+
+******************************************************************************
+PART 3 — Core Meaning
+wait()
+
+Current thread:
+
+releases monitor lock
+enters WAITING state
+waits until notified or interrupted
+notify()
+
+Wakes one waiting thread on same monitor.
+
+notifyAll()
+
+Wakes all waiting threads on same monitor.
+
+**************************************************************************
+🔥 Key Rule (Very Important)
+wait release object lock
+👉 wait() and notify() must be called:
+
+On the same object
+Inside synchronized(lock)
+
+*********************************************
+PART 4 — Must Use Inside synchronized
+
+Wrong:
+
+obj.wait();
+
+Throws:
+
+IllegalMonitorStateException
+
+| `wait()`           | `sleep()`             |
+| ------------------ | --------------------- |
+| Object method      | Thread method         |
+| Releases lock      | Does not release lock |
+| For coordination   | For delay             |
+| Needs synchronized | No                    |
+| WAITING state      | TIMED_WAITING         |
+
+
+
+PART 2 — Lock Interface
+
+Main methods:
+
+lock()
+unlock()
+tryLock()
+tryLock(time, unit)
+lockInterruptibly()
+newCondition()
+
+Most common implementation:
+
+ReentrantLock
+
+
+
+
+PART 3 — Basic ReentrantLock
+Program 1
+Lock lock = new ReentrantLock();
+
+lock.lock();
+
+try {
+   System.out.println("Critical section");
+} finally {
+   lock.unlock();
+}
+
+Important Rule
+
+Always unlock in finally.
+
+Wrong:
+
+lock.lock();
+doWork();
+lock.unlock();
+
+If exception occurs → lock may never release.
+
+
+PART 4 — Why Called ReentrantLock?
+
+Same thread can acquire same lock multiple times.
+
+
+
+
+
+
+
+PART 12 — Fairness
+
+Default ReentrantLock is non-fair.
+
+Meaning:
+
+New thread may “barge” ahead of waiting thread.
+
+Better throughput.
+
+Fair Lock
+Lock lock = new ReentrantLock(true);
+
+true = fair lock.
+
+FIFO-ish acquisition order.
+
+Program 8
+Lock fairLock = new ReentrantLock(true);
+
+
+
+
+
+
+
+
+
+*******************************
+🧠 What is ReadWriteLock?
+
+👉 ReadWriteLock allows:
+
+Multiple readers at the same time ✅
+But only one writer at a time ❗
+Used when:
+
+Many reads
+Few writes
+
+Instead of one lock blocking everyone.
+
+Allows:
+
+multiple readers simultaneously
+one writer exclusively
+Syntax
+ReadWriteLock rw = new ReentrantReadWriteLock();
+
+Locks:
+
+rw.readLock()
+rw.writeLock()
+
+
+
+
+ReadWriteLock rw = new ReentrantReadWriteLock();
+Map<Integer,String> map = new HashMap<>();
+
+rw.readLock().lock();
+try {
+   map.get(1);
+} finally {
+   rw.readLock().unlock();
+}
+
+
+do more problems on concurrenthashmap
