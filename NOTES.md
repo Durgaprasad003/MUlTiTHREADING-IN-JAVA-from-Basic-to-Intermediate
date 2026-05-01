@@ -26,8 +26,15 @@ Interview favorite.
 Used for:
 
 ✅ Performance
+Multithreading improves performance by reducing waiting time.
+Think like this:
+In a single thread → tasks run one after another
 ✅ Parallel tasks
 ✅ Better CPU usage
+Without multithreading:
+CPU may sit idle when a task is waiting (I/O, API, DB)
+With multithreading:
+While one thread waits → another thread runs
 ✅ Responsive applications
 ✅ Async processing
 ✅ Background jobs
@@ -40,6 +47,10 @@ class MyThread extends Thread {
 }
 
 Because main thread and child thread run concurrently. Once you call start(), the JVM scheduler decides when each thread gets CPU time. There is no guarantee that main ended prints last.************************************
+
+💡 Simple Line to Remember
+Concurrency = switching
+Parallelism = simultaneous executio
 
 When a class implements Runnable, that class is not a thread. It only contains the task/code to run.
 To actually run that task in a new thread, you must give the Runnable object to a Thread.******************************
@@ -179,7 +190,7 @@ This is commonly called running state.
 
 4. BLOCKED State
 
-Thread waits to acquire a monitor lock.
+Thread waits to acquire a monitor lock.*********************************************************
 
 Example:
 
@@ -276,6 +287,7 @@ Long-running loop thread can give chance to others
 
 
 interrupt()
+getState()
 isAlive()
 getName()
 setName()
@@ -288,7 +300,7 @@ setPriority()
 
 wait() is in the Object class because it is used for object-level synchronization, not for thread execution control.
 Methods like start(), run(), sleep(), and yield() control the behavior of the current thread, so they belong to the Thread class.
-But wait() is different—it makes a thread wait on a shared object's lock (monitor) until another thread calls notify() or notifyAll() on the same object. Since every Java object can be used as a lock, wait() is placed in the Object class.
+************But wait() is different—it makes a thread wait on a shared object's lock (monitor) until another thread calls notify() or notifyAll() on the same object. Since every Java object can be used as a lock, wait() is placed in the Object class.
 One-line answer:
 “Thread methods control thread execution, but wait() works with an object's monitor lock, so it belongs to Object class, not Thread class.”
 
@@ -323,7 +335,7 @@ When thread enters:
 
 synchronized void increment()
 
-Java gives lock of object.
+Java gives lock of object.**********************
 Other thread must wait.
 When first thread exits:
 Lock released.
@@ -451,14 +463,14 @@ Always lock in same order.
 16. wait(), notify(), notifyAll()
 
 Used for thread communication.
-
+************************************
 Must be inside synchronized block.
 
 
 
 
 
-This is explicit locking in Java using ReentrantLock.
+This is explicit locking in Java using ReentrantLock.******************************
 
 It is an alternative to synchronized.
 
@@ -610,7 +622,7 @@ But must unlock same number of times.
 
 
 
-AtomicInteger is used when multiple threads need to safely update an integer without using synchronized blocks.
+AtomicInteger is used when multiple threads need to safely update an integer without using synchronized blocks.**************************
 
 It provides atomic operations like increment, decrement, compare-and-set.
 
@@ -824,7 +836,7 @@ if(lock.tryLock()) {
     System.out.println("Could not get lock");
 }
 
-Useful when avoiding deadlocks.
+Useful when avoiding deadlocks.***************************************************
 
 
 
@@ -964,6 +976,108 @@ CopyOnWriteArrayList
 BlockingQueue
 ConcurrentLinkedQueue
 ConcurrentSkipListMap
+
+
+
+
+1️⃣ ConcurrentHashMap Example
+
+👉 Thread-safe map (no full locking, high performance)
+
+import java.util.concurrent.ConcurrentHashMap;
+
+public class CHMExample {
+    public static void main(String[] args) {
+
+        ConcurrentHashMap<Integer, String> map = new ConcurrentHashMap<>();
+
+        Runnable writer = () -> {
+            for (int i = 1; i <= 5; i++) {
+                map.put(i, "Value-" + i);
+                System.out.println(Thread.currentThread().getName() + " added " + i);
+            }
+        };
+
+        Thread t1 = new Thread(writer);
+        Thread t2 = new Thread(writer);
+
+        t1.start();
+        t2.start();
+    }
+}
+
+👉 No ConcurrentModificationException even with multiple threads.
+
+2️⃣ CopyOnWriteArrayList Example
+
+👉 Safe iteration while modifying
+
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class COWExample {
+    public static void main(String[] args) {
+
+        CopyOnWriteArrayList<Integer> list = new CopyOnWriteArrayList<>();
+
+        list.add(1);
+        list.add(2);
+        list.add(3);
+
+        for (Integer num : list) {
+            System.out.println(num);
+
+            // safe modification during iteration
+            list.add(4);
+        }
+
+        System.out.println("Final List: " + list);
+    }
+}
+
+👉 Internally creates a new copy on modification
+
+3️⃣ BlockingQueue Example (Producer–Consumer)
+
+👉 No need for wait()/notify()
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+public class BQExample {
+    public static void main(String[] args) {
+
+        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(3);
+
+        // Producer
+        new Thread(() -> {
+            try {
+                for (int i = 1; i <= 5; i++) {
+                    queue.put(i);
+                    System.out.println("Produced: " + i);
+                }
+            } catch (Exception e) {}
+        }).start();
+
+        // Consumer
+        new Thread(() -> {
+            try {
+                for (int i = 1; i <= 5; i++) {
+                    int val = queue.take();
+                    System.out.println("Consumed: " + val);
+                }
+            } catch (Exception e) {}
+        }).start();
+    }
+}
+
+👉 put() waits if full
+👉 take() waits if empty
+
+
+
+
+
+
 
 PHASE 14 — BLOCKING QUEUE
 
@@ -1423,3 +1537,43 @@ try {
 
 
 do more problems on concurrenthashmap
+
+
+
+
+
+****************************************************************
+
+A variable is effectively final if its value doesn’t change after initialization, and lambda expressions can only capture such variables to ensure thread safety and consistency.”
+🔴 1. What this line actually creates
+ExecutorService ex = Executors.newFixedThreadPool(5);
+What happens internally:
+
+👉 You create a thread pool with 5 worker threads
+
+Not immediately all running tasks
+Threads are created and managed by the pool
+They are reused (very important)
+🔹 Concept
+ExecutorService → manages threads
+ThreadPool → group of reusable threads
+
+Think:
+
+Pool = 5 workers sitting idle
+Tasks come → workers pick them up
+🔹 2. What ex.submit() does
+ex.submit(() -> System.out.println("Task"));
+
+👉 This does NOT create a new thread
+
+👉 It submits a task to the pool
+
+🔥 Internal flow:
+submit(task)
+   ↓
+Task added to queue
+   ↓
+One free thread picks it
+   ↓
+Thread executes task

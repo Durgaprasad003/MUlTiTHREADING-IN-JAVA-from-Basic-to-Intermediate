@@ -1,8 +1,12 @@
 class Counter {
-    int count = 0;
+   private int count = 0;
 
     void increment() {
         count++;
+    }
+
+     int getCount() {
+        return count;
     }
 }
 
@@ -15,7 +19,7 @@ public class mul2 {
             for (int i = 0; i < 5; i++) {
                 synchronized(obj) {
                     obj.increment();
-                    System.out.println("Thread 1 : " + obj.count);
+                    System.out.println("Thread 1 : " + obj.getCount());
                 }
             }
         });
@@ -24,7 +28,7 @@ public class mul2 {
             for (int i = 0; i < 5; i++) {
                 synchronized(obj) {
                     obj.increment();
-                    System.out.println("Thread 2 : " + obj.count);
+                    System.out.println("Thread 2 : " + obj.getCount());
                 }
             }
         });

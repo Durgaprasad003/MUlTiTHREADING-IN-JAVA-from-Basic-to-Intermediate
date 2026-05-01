@@ -1,0 +1,3 @@
+We know multithreading is for simultaneous execution, so how do we use synchronization?
+
+“Multithreading enables concurrent execution to improve performance, but when threads access shared mutable data, it can lead to race conditions. Synchronization is used to control access to critical sections so that only one thread executes that part at a time, ensuring data consistency.”

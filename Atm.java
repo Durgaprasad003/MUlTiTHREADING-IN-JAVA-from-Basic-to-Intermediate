@@ -24,13 +24,13 @@ public class Atm {
     public static void main(String[] args) throws InterruptedException {
 
         machine atm = new machine();
-
+        machine obj=new machine();
         Thread user1 = new Thread(() -> {
             atm.withdraw("Prasad", 400);
         });
 
         Thread user2 = new Thread(() -> {
-            atm.withdraw("Ravi", 500);
+            obj.withdraw("Ravi", 500);
         });
 
         Thread user3 = new Thread(() -> {
@@ -48,3 +48,14 @@ public class Atm {
         atm.checkBalance();
     }
 }
+
+
+// 🔹 2. Key concept: synchronized is object-level
+// synchronized void withdraw(...)
+
+// Lock is taken on that specific object instance, not the class.
+
+// So:
+
+// Threads using atm → share same lock
+// Threads using obj → different lock
